@@ -3,15 +3,16 @@ import heroImage from "../../../../public/neids-1.webp"; // Replace with your im
 export default function Hero() {
   return (
     <section
-      className="relative h-screen flex items-center justify-center bg-center bg-cover pt-20" 
+      className="relative h-screen flex items-center justify-center bg-center bg-cover pt-20"
       style={{
-        backgroundImage: `url(${heroImage.src})`
+        backgroundImage: `url(${heroImage.src})`,
       }}
     >
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/50" />
+      <div className="absolute inset-0 z-0 bg-black/50 pointer-events-none" />
 
       {/* Content */}
+      <div className="absolute inset-x-0 top-0 h-24 z-0 bg-gradient-to-b from-black/40 to-transparent pointer-events-none" />
       <div className="relative z-10 text-center text-white px-4">
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
           Modern Frameless Cabinetry

@@ -6,11 +6,13 @@ import logo from "../../public/logo.png"; // Replace with your logo path
 import Image from "next/image";
 
 export default async function Home() {
-  const projects = await getProjects(6); // returns ProjectEntry[]
+  const projects = await getProjects(3); // returns ProjectEntry[]
 
   return (
     <div>
-      <Hero />
+      <div className="-mt-[80px]">
+        <Hero />
+      </div>
       {/* Featured Projects */}
 
       <section className="container mx-auto px-4 py-8">

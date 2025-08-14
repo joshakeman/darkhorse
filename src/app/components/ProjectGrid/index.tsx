@@ -1,19 +1,17 @@
 import type { ProjectEntry } from "../../../../lib/contentful-types";
 import ProjectCard from "../../components/ProjectCard";
 
-export default function ProjectGrid({ projects }: { projects: ProjectEntry[] }) {
+export default function ProjectGrid({
+  projects,
+}: {
+  projects: ProjectEntry[];
+}) {
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="mb-6 flex items-end justify-between">
         <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">
           Featured Projects
         </h2>
-        <a
-          href="/gallery"
-          className="text-sm uppercase tracking-wider text-neutral-600 hover:text-neutral-900"
-        >
-          View all
-        </a>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

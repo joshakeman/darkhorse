@@ -24,10 +24,13 @@ const NAV: NavItem[] = [
 
 export default function Header({ nav = NAV }: { nav?: NavItem[] }) {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
+  const onHome = pathname === "/";
+
+  const [scrolled, setScrolled] = useState(!onHome);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (!onHome) return;
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll);
@@ -40,12 +43,27 @@ export default function Header({ nav = NAV }: { nav?: NavItem[] }) {
   }, [pathname]);
 
   return (
-<header className="fixed top-0 left-0 w-full z-50 bg-transparent px-6 py-4 flex items-center">
-      <div className="container mx-auto flex h-16 items-center justify-between p-3">
+    <header
+      className={[
+        "fixed inset-x-0 top-0 z-[200] transition-colors duration-300",
+        scrolled
+          ? "bg-white/90 backdrop-blur shadow-sm text-neutral-900"
+          : "bg-black/30 backdrop-blur-sm text-white", // translucent over hero
+      ].join(" ")}
+    >
+      <div className="container mx-auto h-[96px] px-4 flex items-center gap-6 pt-[env(safe-area-inset-top)]">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3">
-          {/* Replace with the real logo image if available */}
-          <Image src={logo} alt="Logo" className="w-24" />
+        <Link
+          href="/"
+          className="flex items-center gap-3"
+          aria-label="Dark Horse Woodworks home"
+        >
+          <Image
+            src={logo}
+            alt="Logo"
+            className="block h-28 w-auto" // <-- block avoids baseline bleed
+            priority
+          />
         </Link>
 
         {/* Desktop Nav */}
@@ -110,7 +128,9 @@ export default function Header({ nav = NAV }: { nav?: NavItem[] }) {
           (open ? "max-h-96" : "max-h-0")
         }
       >
-        <div className={"container mx-auto pb-4 " + (scrolled ? "" : "text-white") }>
+        <div
+          className={"container mx-auto pb-4 " + (scrolled ? "" : "text-white")}
+        >
           <nav className="flex flex-col gap-2 pt-2">
             {nav.map((item) => {
               const active = pathname === item.href;

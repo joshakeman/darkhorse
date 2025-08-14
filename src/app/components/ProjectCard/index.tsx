@@ -5,12 +5,13 @@ import type { ProjectEntry } from "../../../../lib/contentful-types";
 
 export default function ProjectCard({ p }: { p: ProjectEntry }) {
   const cover = p.fields.featureImage;
-  const coverUrl =
-    cover?.fields.file?.url ? `https:${cover.fields.file.url}` : undefined;
+  const coverUrl = cover?.fields.file?.url
+    ? `https:${cover.fields.file.url}`
+    : undefined;
 
   // Prefer a short excerpt: if your rich text is long, you might strip to first paragraph.
   return (
-    <article className="group overflow-hidden rounded-2xl ring-1 ring-black/5">
+    <article className="group overflow-hidden rounded-2xl ring-1 ring-black/5 cursor-pointer">
       <div className="relative h-60 w-full">
         {coverUrl ? (
           <Image
@@ -34,7 +35,7 @@ export default function ProjectCard({ p }: { p: ProjectEntry }) {
             href={p.fields.slug ? `/gallery/${p.fields.slug}` : "#"}
             className="hover:underline"
           > */}
-            {p.fields.title}
+          {p.fields.title}
           {/* </Link> */}
         </h3>
 
