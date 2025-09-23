@@ -15,13 +15,16 @@ export default async function Home() {
       </div>
       {/* Featured Projects */}
 
-      <section className="container mx-auto px-4 py-8">
+      <section className="container mx-auto px-4 py-16">
+          <h2 className="text-3xl font-serif text-center">
+            Featured Projects
+          </h2>
         <ProjectGrid projects={projects} />
       </section>
       <section className="bg-gray-50 py-20">
         <div className="container mx-auto px-4">
 
-          <h2 className="text-3xl font-serif text-center mb-12">
+          <h2 className="text-3xl font-serif text-center">
             Learn More About Us
           </h2>
           <HomeTriptych />
