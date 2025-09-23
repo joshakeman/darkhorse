@@ -1,14 +1,10 @@
-// components/HomeTriptych.tsx
 import Link from "next/link";
 import Image from "next/image";
-import workshopPhoto from '../../../../public/workshop-photo.jpg';
-import contactPhoto from '../../../../public/contact-photo.jpeg';
-import childPhoto from '../../../../public/old-childhood-photo.jpeg'
 
 type Card = {
   title: string;
   href: string;
-  image: string; // path in /public or remote URL (allowed in next.config.js)
+  image: string; // /public path or remote URL (whitelisted in next.config)
   blurb?: string;
   eyebrow?: string;
 };
@@ -17,20 +13,20 @@ export function HomeTriptych({
   items = [
     {
       title: "Our Story",
-      href: "/about",
-      image: childPhoto.src,
+      href: "/our-story",
+      image: "/old-childhood-photo.jpeg",
       blurb: "Decades of precision craft in modern frameless cabinetry.",
     },
     {
       title: "Process",
-      href: "/process",
-      image: workshopPhoto.src,
+      href: "/working-with-darkhorse",
+      image: "/workshop-photo.jpg",
       blurb: "From materials to millwork—our method, step by step.",
     },
     {
       title: "Contact",
       href: "/contact",
-      image: contactPhoto.src,
+      image: "/contact-photo.jpeg",
       blurb: "Start your project with a consultation.",
     },
   ],
@@ -42,7 +38,8 @@ export function HomeTriptych({
           <Link
             key={card.href}
             href={card.href}
-            className="group relative isolate overflow-hidden rounded-2xl ring-1 ring-black/5 transition-transform duration-300 will-change-transform hover:-translate-y-0.5"
+            className="group relative isolate overflow-hidden rounded-xl ring-1 ring-black/5 transition-transform duration-300 will-change-transform hover:-translate-y-0.5"
+            aria-label={card.title}
           >
             {/* Image */}
             <div className="relative aspect-[4/3] w-full">
@@ -62,19 +59,23 @@ export function HomeTriptych({
             {/* Content */}
             <div className="absolute inset-x-0 bottom-0 z-10 p-5 text-white">
               {card.eyebrow && (
-                <div className="mb-1 text-[11px] uppercase tracking-[0.14em] text-white/70">
+                <div className="mb-1 font-serif text-[11px] uppercase tracking-[0.14em] text-white/70">
                   {card.eyebrow}
                 </div>
               )}
-              <h3 className="text-lg font-semibold tracking-wide uppercase">
+              <h3 className="text-lg font-serif font-semibold tracking-wide uppercase">
                 {card.title}
               </h3>
               {card.blurb && (
-                <p className="mt-1 text-sm text-white/90 line-clamp-2">{card.blurb}</p>
+                <p className="mt-1 font-serif text-sm text-white/90 line-clamp-2">
+                  {card.blurb}
+                </p>
               )}
-              <span className="mt-3 inline-flex items-center gap-2 rounded-full border border-white/80 px-3 py-1 text-xs uppercase tracking-wider transition group-hover:bg-white group-hover:text-black">
+              <span className="font-serif mt-3 inline-flex items-center gap-2 rounded-full border border-white/80 px-3 py-1 text-xs uppercase tracking-wider transition group-hover:bg-white group-hover:text-black">
                 Learn more
-                <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M7.5 5.5 12 10l-4.5 4.5"/></svg>
+                <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M7.5 5.5 12 10l-4.5 4.5" />
+                </svg>
               </span>
             </div>
           </Link>

@@ -20,16 +20,8 @@ export default async function Home() {
       </section>
       <section className="bg-gray-50 py-20">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center mb-8">
-            <span className="inline-block w-16 h-[2px] bg-gray-300"></span>
-            <Image
-              src={logo}
-              alt="Dark Horse Logo"
-              className="mx-4 h-6 w-auto"
-            />
-            <span className="inline-block w-16 h-[2px] bg-gray-300"></span>
-          </div>
-          <h2 className="text-3xl font-semibold text-center mb-12">
+
+          <h2 className="text-3xl font-serif text-center mb-12">
             Learn More About Us
           </h2>
           <HomeTriptych />

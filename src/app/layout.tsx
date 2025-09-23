@@ -1,17 +1,14 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Playfair_Display } from "next/font/google"; // <— NEW
 import "./globals.css";
 import Header from "./components/Header";
+import Footer from "./components/Footer"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const playfair = Playfair_Display({ variable: "--font-serif", subsets: ["latin"] }); // <— NEW
 
 export const metadata: Metadata = {
   title: "Dark Horse Woodworks",
@@ -24,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-white text-neutral-900 antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} min-h-screen bg-white text-neutral-900 antialiased`}
       >
         {/* Skip to content for keyboard/screen readers */}
         <a
@@ -44,6 +41,7 @@ export default function RootLayout({
         >
           {children}
         </main>
+        <Footer />
       </body>
     </html>
   );
