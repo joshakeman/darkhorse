@@ -10,7 +10,7 @@ export default async function BlogIndexPage() {
 
   return (
     <article className="container mx-auto px-4 pb-20">
-      <PageHeader title="Blog" subtitle="Notes from the shop: projects, materials, and methods." image="/triptych-process.jpg" />
+      <PageHeader title="Blog" subtitle="Notes from the shop: projects, materials, and methods." imageSrc="/triptych-process.jpg" />
 
       <section className="mx-auto max-w-6xl">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

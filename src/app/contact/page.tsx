@@ -9,7 +9,7 @@ export default function ContactPage() {
       <PageHeader
         title="Contact"
         subtitle="Tell us about your project and we’ll get in touch."
-        image="/triptych-contact.jpg" // swap for a better hero if you like
+        imageSrc="/triptych-contact.jpg" // swap for a better hero if you like
       />
 
       <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-5">
