@@ -10,9 +10,9 @@ function req(name: string) {
   return v;
 }
 
-const space = req("CONTENTFUL_SPACE_ID");
-const environment = (process.env.CONTENTFUL_ENVIRONMENT || "master").trim();
-const accessToken = req("CONTENTFUL_CDA_TOKEN");
+const space = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID!;
+const environment = process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT ?? 'master';
+const accessToken = process.env.CONTENTFUL_CDA_TOKEN!;
 
 export const contentful = createClient({ space, environment, accessToken });
 
