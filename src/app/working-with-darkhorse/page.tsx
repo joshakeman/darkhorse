@@ -10,7 +10,7 @@ export default function WorkingWithDarkhorsePage() {
       <PageHeader
         title="Working With Darkhorse"
         subtitle="Our design and build process"
-        imageSrc="/triptych-process.jpg" // swap for a better hero if you like
+        // imageSrc="/triptych-process.jpg" // swap for a better hero if you like
       />
 
       {/* Intro */}
