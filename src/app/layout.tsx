@@ -10,10 +10,37 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const playfair = Playfair_Display({ variable: "--font-serif", subsets: ["latin"] }); // <— NEW
 
-export const metadata: Metadata = {
+// src/app/layout.tsx
+export const metadata = {
+  metadataBase: new URL("https://darkhorse-woodworks.netlify.app/"), // replace with your domain
   title: "Dark Horse Woodworks",
-  description: "Modern frameless cabinetry — design, craftsmanship, cabinetry.",
+  description: "Modern design. Timeless craft.",
+  openGraph: {
+    type: "website",
+    url: "/",
+    title: "Dark Horse Woodworks",
+    description: "Modern design. Timeless craft.",
+    images: [
+      {
+        url: "/logo.png", // <- logo as preview
+        width: 600,       // your logo’s actual pixel size if you know it
+        height: 600,
+        alt: "Dark Horse Woodworks logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dark Horse Woodworks",
+    description: "Modern design. Timeless craft.",
+    images: ["/logo.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
 };
+
 
 export default function RootLayout({
   children,
