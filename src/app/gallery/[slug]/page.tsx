@@ -4,11 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
-import { BLOCKS, INLINES, MARKS } from "@contentful/rich-text-types";
-import {
-  getProjectTitles,
-  getProjectBySlugFromTitle,
-} from "../../../../lib/contentful";
+import { BLOCKS, INLINES } from "@contentful/rich-text-types";
+import { getProjectTitles, getProjectBySlugFromTitle } from "../../../../lib/contentful";
 import { slugifyTitle } from "../../../../lib/slug";
 
 export const revalidate = 60;
@@ -18,36 +15,34 @@ export async function generateStaticParams() {
   return titles.map(({ title }) => ({ slug: slugifyTitle(title) }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const project = await getProjectBySlugFromTitle(params.slug);
+// 👇 params is a Promise<{ slug: string }>
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const project = await getProjectBySlugFromTitle(slug);
   if (!project) return { title: "Project not found" };
   return { title: project.fields.title };
 }
 
 const richTextOptions = {
-  // turn soft line breaks into <br/>
   renderText: (text: string) =>
     text.split("\n").flatMap((segment, i) =>
       i === 0 ? [segment] : [<br key={i} />, segment]
     ),
-
   renderNode: {
-    [BLOCKS.PARAGRAPH]: (_node: any, children: any) => (
-      <p className="my-4">{children}</p> // ensure spacing regardless of prose
+    [BLOCKS.PARAGRAPH]: (_node: unknown, children: React.ReactNode) => (
+      <p className="my-4">{children}</p>
     ),
-    [BLOCKS.HEADING_2]: (_n: any, children: any) => (
+    [BLOCKS.HEADING_2]: (_n: unknown, children: React.ReactNode) => (
       <h2 className="mt-8 mb-3 text-2xl font-semibold">{children}</h2>
     ),
-    [BLOCKS.QUOTE]: (_n: any, children: any) => (
+    [BLOCKS.QUOTE]: (_n: unknown, children: React.ReactNode) => (
       <blockquote className="my-6 border-l-4 border-neutral-300 pl-4 italic">
         {children}
       </blockquote>
     ),
-    [INLINES.HYPERLINK]: (node: any, children: any) => {
+    [INLINES.HYPERLINK]: (node: any, children: React.ReactNode) => {
       const href = node.data.uri as string;
       const ext = /^https?:\/\//.test(href);
       return (
@@ -64,12 +59,13 @@ const richTextOptions = {
   },
 };
 
-export default async function ProjectPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const project = await getProjectBySlugFromTitle(params.slug);
+// 👇 params is a Promise here too
+export default async function ProjectPage(
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
+
+  const project = await getProjectBySlugFromTitle(slug);
   if (!project) notFound();
 
   const f = project.fields;
@@ -88,11 +84,11 @@ export default async function ProjectPage({
     (f as any).categoryKitchens ? "Kitchen" : null,
     (f as any).categoryBathrooms ? "Bathroom" : null,
     (f as any).categoryBuiltIns ? "Built-ins" : null,
+    (f as any).categoryClosets ? "Closets" : null, // if you added closets
   ].filter(Boolean) as string[];
 
   return (
     <article className="container mx-auto px-4 pb-20">
-      {/* pull hero up under fixed header (adjust value to match your header) */}
       <div className="-mt-[96px] mb-8">
         {heroUrl ? (
           <div className="relative h-[48vh] min-h-[320px] w-full overflow-hidden rounded-b-2xl">
@@ -140,6 +136,7 @@ export default async function ProjectPage({
           </div>
         </section>
       )}
+
       <hr className="mx-auto my-10 max-w-5xl border-neutral-200" />
 
       {gallery.length > 0 && (

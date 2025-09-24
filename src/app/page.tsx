@@ -2,8 +2,6 @@ import ProjectGrid from "./components/ProjectGrid";
 import { getProjects } from "../../lib/contentful";
 import Hero from "./components/Hero";
 import { HomeTriptych } from "./components/HomeTryptich";
-import logo from "../../public/logo.png"; // Replace with your logo path
-import Image from "next/image";
 
 export default async function Home() {
   const projects = await getProjects(3); // returns ProjectEntry[]

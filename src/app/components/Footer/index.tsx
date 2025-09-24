@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 // src/app/components/Footer/index.tsx
 export default function Footer() {
   return (
@@ -7,15 +9,15 @@ export default function Footer() {
           © {new Date().getFullYear()} Dark Horse Woodworks. All rights reserved.
         </p>
         <nav className="flex gap-4">
-          <a href="/our-story" className="hover:text-neutral-900">
+          <Link href="/our-story" className="hover:text-neutral-900">
             About
-          </a>
-          <a href="/gallery" className="hover:text-neutral-900">
+          </Link>
+          <Link href="/gallery" className="hover:text-neutral-900">
             Gallery
-          </a>
-          <a href="/contact" className="hover:text-neutral-900">
+          </Link>
+          <Link href="/contact" className="hover:text-neutral-900">
             Contact
-          </a>
+          </Link>
         </nav>
       </div>
     </footer>

@@ -1,5 +1,4 @@
 // app/gallery/page.tsx
-import ProjectGrid from "../components/ProjectGrid";
 import { getProjects } from "../../../lib/contentful";
 import GalleryClient from "../components/GalleryClient";
 import PageHeader from "../components/PageHeader";
