@@ -12,7 +12,6 @@ import { slugifyTitle } from "../../../../lib/slug";
 
 import InterleavedRichText from "../../components/InterleavedRichText";
 import { isAssetLike, type AssetLike } from "../../../../lib/image";
-
 import {
   ctfImageUrl,
   ctfBlurDataURL,
@@ -28,24 +27,18 @@ export async function generateStaticParams() {
   return titles.map(({ title }) => ({ slug: slugifyTitle(title) }));
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const project = await getProjectBySlugFromTitle(params.slug);
+// ✅ Use `any` to avoid ambient PageProps with params: Promise<any>
+export async function generateMetadata({ params }: any): Promise<Metadata> {
+  const project = await getProjectBySlugFromTitle(params.slug as string);
   if (!project) return { title: "Project not found" };
   return { title: project.fields.title };
 }
 
 // ----- Page ------------------------------------------------------------------
 
-export default async function ProjectPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const project = await getProjectBySlugFromTitle(params.slug);
+// ✅ Use `any` here too
+export default async function ProjectPage({ params }: any) {
+  const project = await getProjectBySlugFromTitle(params.slug as string);
   if (!project) notFound();
 
   const f = project.fields;
@@ -57,7 +50,7 @@ export default async function ProjectPage({
 
   // Collect gallery images (Assets) and filter out the hero (avoid dup)
   const galleryAll: AssetLike[] = Array.isArray(f.galleryImages)
-    ? (f.galleryImages as unknown[]).filter(isAssetLike) // guard narrows to AssetLike[]
+    ? (f.galleryImages as unknown[]).filter(isAssetLike)
     : [];
   const gallery = hero?.sys?.id
     ? galleryAll.filter((a) => a.sys.id !== hero.sys.id)

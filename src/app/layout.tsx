@@ -1,14 +1,20 @@
 // app/layout.tsx
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Playfair_Display } from "next/font/google"; // <— NEW
 import "./globals.css";
 import Header from "./components/Header";
-import Footer from "./components/Footer"
+import Footer from "./components/Footer";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-const playfair = Playfair_Display({ variable: "--font-serif", subsets: ["latin"] }); // <— NEW
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+const playfair = Playfair_Display({
+  variable: "--font-serif",
+  subsets: ["latin"],
+}); // <— NEW
 
 // src/app/layout.tsx
 export const metadata = {
@@ -23,7 +29,7 @@ export const metadata = {
     images: [
       {
         url: "/logo.png", // <- logo as preview
-        width: 600,       // your logo’s actual pixel size if you know it
+        width: 600, // your logo’s actual pixel size if you know it
         height: 600,
         alt: "Dark Horse Woodworks logo",
       },
@@ -36,11 +42,10 @@ export const metadata = {
     images: ["/logo.png"],
   },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
-
 
 export default function RootLayout({
   children,

@@ -5,42 +5,54 @@ import { slugifyTitle } from "../../../../lib/slug";
 
 export default function ProjectCard({ p }: { p: ProjectEntry }) {
   const cover = p.fields.featureImage as any;
-  const url = cover?.fields?.file?.url ? `https:${cover.fields.file.url}?fm=webp&w=1600&q=70` : undefined;
+  const url = cover?.fields?.file?.url
+    ? `https:${cover.fields.file.url}?fm=webp&w=1600&q=70`
+    : undefined;
 
   return (
     <article className="group overflow-hidden rounded-xl ring-1 ring-black/5">
-      <div className="relative h-60 w-full">
-        {url ? (
-          <Image
-            src={url}
-            alt={cover?.fields?.title || p.fields.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-neutral-500">No image</div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
-      </div>
+      <Link
+        href={`/gallery/${slugifyTitle(p.fields.title)}`}
+        className="hover:underline"
+      >
+        <div className="relative h-60 w-full">
+          {url ? (
+            <Image
+              src={url}
+              alt={cover?.fields?.title || p.fields.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-neutral-100 text-neutral-500">
+              No image
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+        </div>
 
-      <div className="p-4">
-        <h3 className="text-2xl font-semibold font-serif tracking-tight">
-          <Link href={`/gallery/${slugifyTitle(p.fields.title)}`} className="hover:underline">
+        <div className="p-4">
+          <h3 className="text-2xl font-semibold font-serif tracking-tight">
             {p.fields.title}
-          </Link>
-        </h3>
+          </h3>
 
-{/* inside your card body, replace your current pills block */}
-<div className="mt-3 flex flex-wrap gap-2">
-  {isTrue((p.fields as any).categoryKitchens) && <Pill>Kitchen</Pill>}
-  {isTrue((p.fields as any).categoryBathrooms) && <Pill>Bathroom</Pill>}
-  {isTrue((p.fields as any).categoryBuiltIns) && <Pill>Built-ins</Pill>}
-  {isTrue((p.fields as any).categoryCloset) || isTrue((p.fields as any).categoryClosets) ? (
-    <Pill>Closets</Pill>
-  ) : null}
-</div>
-      </div>
+          {/* inside your card body, replace your current pills block */}
+          <div className="mt-3 flex flex-wrap gap-2">
+            {isTrue((p.fields as any).categoryKitchens) && <Pill>Kitchen</Pill>}
+            {isTrue((p.fields as any).categoryBathrooms) && (
+              <Pill>Bathroom</Pill>
+            )}
+            {isTrue((p.fields as any).categoryBuiltIns) && (
+              <Pill>Built-ins</Pill>
+            )}
+            {isTrue((p.fields as any).categoryCloset) ||
+            isTrue((p.fields as any).categoryClosets) ? (
+              <Pill>Closets</Pill>
+            ) : null}
+          </div>
+        </div>
+      </Link>
     </article>
   );
 }

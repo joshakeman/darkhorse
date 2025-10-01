@@ -1,17 +1,24 @@
 // lib/contentful.ts
 import "server-only"; // <-- prevents client bundling
 import { createClient } from "contentful";
-import type { ProjectSkeleton, ProjectEntry, ReviewSkeleton, ReviewEntry, BlogPostEntry, BlogPostSkeleton } from "./contentful-types";
+import type {
+  ProjectSkeleton,
+  ProjectEntry,
+  ReviewSkeleton,
+  ReviewEntry,
+  BlogPostEntry,
+  BlogPostSkeleton,
+} from "./contentful-types";
 import { slugifyTitle } from "./slug"; // <-- use our own slug function
 
-function req(name: string) {
-  const v = process.env[name]?.trim();
-  if (!v) throw new Error(`[contentful] Missing required env: ${name}`);
-  return v;
-}
+// function req(name: string) {
+//   const v = process.env[name]?.trim();
+//   if (!v) throw new Error(`[contentful] Missing required env: ${name}`);
+//   return v;
+// }
 
 const space = process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID!;
-const environment = process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT ?? 'master';
+const environment = process.env.NEXT_PUBLIC_CONTENTFUL_ENVIRONMENT ?? "master";
 const accessToken = process.env.CONTENTFUL_CDA_TOKEN!;
 
 export const contentful = createClient({ space, environment, accessToken });
@@ -61,9 +68,9 @@ export async function getProjectBySlugFromTitle(
 
 export async function getReviews(limit = 24): Promise<ReviewEntry[]> {
   const res = await contentful.getEntries<ReviewSkeleton>({
-    content_type: "review",       // match your Content Type API ID
-    include: 2,                   // resolve the projectImage asset
-    order: ["-sys.createdAt"],    // newest first
+    content_type: "review", // match your Content Type API ID
+    include: 2, // resolve the projectImage asset
+    order: ["-sys.createdAt"], // newest first
     limit,
   });
   return res.items as ReviewEntry[];
@@ -79,7 +86,9 @@ export async function getBlogPosts(limit = 20): Promise<BlogPostEntry[]> {
   return res.items as BlogPostEntry[];
 }
 
-export async function getBlogTitles(): Promise<Array<{ id: string; title: string }>> {
+export async function getBlogTitles(): Promise<
+  Array<{ id: string; title: string }>
+> {
   const res = await contentful.getEntries<BlogPostSkeleton>({
     content_type: "blogPosts",
     select: ["sys.id", "fields.title"],
@@ -93,10 +102,14 @@ export async function getBlogTitles(): Promise<Array<{ id: string; title: string
     .filter(Boolean) as Array<{ id: string; title: string }>;
 }
 
-export async function getBlogBySlugFromTitle(slug: string): Promise<BlogPostEntry | null> {
+export async function getBlogBySlugFromTitle(
+  slug: string
+): Promise<BlogPostEntry | null> {
   const titles = await getBlogTitles();
   const match = titles.find((t) => slugifyTitle(t.title) === slug);
   if (!match) return null;
-  const entry = await contentful.getEntry<BlogPostSkeleton>(match.id, { include: 2 });
+  const entry = await contentful.getEntry<BlogPostSkeleton>(match.id, {
+    include: 2,
+  });
   return entry as unknown as BlogPostEntry;
 }
