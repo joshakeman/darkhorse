@@ -60,7 +60,7 @@ export default async function BlogPostPage({
     ? (f.galleryImages as unknown[]).filter(isAssetLike) // guard narrows to AssetLike[]
     : [];
   const gallery = hero?.sys?.id
-    ? galleryAll.filter((a) => a.sys.id !== hero.sys.id)
+    ? galleryAll.filter((a) => a?.sys?.id !== hero.sys.id)
     : galleryAll;
 
   // Track which images the interleaver consumes so we can show leftovers later

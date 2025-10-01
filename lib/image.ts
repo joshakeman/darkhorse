@@ -1,15 +1,19 @@
 // lib/image.ts
 
 // ---- Canonical Contentful asset shape you rely on in the app ----
+// lib/image.ts
 export type AssetLike = {
-  sys: { id: string };
   fields: {
-    title?: string;
-    file?: {
-      url?: string;
-      details?: { image?: { width?: number; height?: number } };
+    title: string;
+    description?: string; // ✅ add this
+    file: {
+      url: string;
+      details: {
+        image: { width: number; height: number };
+      };
     };
   };
+  sys: { id: string };
 };
 
 // Narrow unknown → AssetLike at runtime
@@ -41,7 +45,7 @@ type UrlOpts = {
 // Use this everywhere you previously hand-built ?w=...&fm=...
 export function ctfImageUrl(x: unknown, opts: UrlOpts = {}): string | null {
   if (!isAssetLike(x)) return null;
-  const base = x.fields.file?.url;
+  const base = x.fields?.file?.url;
   if (!base) return null;
   const w = opts.w ?? IMG_PRESETS.CONTENT.maxW;
   const q = opts.q ?? IMG_PRESETS.CONTENT.q;
@@ -52,7 +56,7 @@ export function ctfImageUrl(x: unknown, opts: UrlOpts = {}): string | null {
 // Tiny blur placeholder using Contentful transform
 export function ctfBlurDataURL(x: unknown): string | undefined {
   if (!isAssetLike(x)) return undefined;
-  const base = x.fields.file?.url;
+  const base = x.fields?.file?.url;
   if (!base) return undefined;
   return `https:${base}?fm=webp&w=24&q=20`;
 }

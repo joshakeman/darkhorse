@@ -3,29 +3,32 @@ import Image from "next/image";
 import Link from "next/link";
 import type { BlogPostEntry } from "../../../../lib/contentful-types";
 import { slugifyTitle } from "../../../../lib/slug";
+import {
+  ctfImageUrl,
+  ctfBlurDataURL,
+  IMG_PRESETS,
+} from "../../../../lib/image";
 
-// very light reading-time estimate (200 wpm)
-function readingTimeFromRichText(rt: unknown): string | null {
-  try {
-    const json = typeof rt === "string" ? JSON.parse(rt) : (rt as any);
-    const text = JSON.stringify(json); // crude but safe without a full extractor
-    const words = Math.max(1, text.replace(/<[^>]+>/g, "").split(/\s+/).length);
-    const mins = Math.max(1, Math.round(words / 200));
-    return `${mins} min read`;
-  } catch {
-    return null;
-  }
-}
+// // very light reading-time estimate (200 wpm)
+// function readingTimeFromRichText(rt: unknown): string | null {
+//   try {
+//     const json = typeof rt === "string" ? JSON.parse(rt) : (rt as any);
+//     const text = JSON.stringify(json); // crude but safe without a full extractor
+//     const words = Math.max(1, text.replace(/<[^>]+>/g, "").split(/\s+/).length);
+//     const mins = Math.max(1, Math.round(words / 200));
+//     return `${mins} min read`;
+//   } catch {
+//     return null;
+//   }
+// }
 
 export default function BlogCard({ post }: { post: BlogPostEntry }) {
   const f = post.fields;
 
-  // feature image
+  // feature image (URL + blur via helper)
   const img = f.featureImage as any;
-  const base = img?.fields?.file?.url ? `https:${img.fields.file.url}` : null;
-  // main image + tiny blur placeholder fetched via Contentful params
-  const url = base ? `${base}?fm=webp&w=1600&q=70` : null;
-  const blur = base ? `${base}?fm=webp&w=24&q=20` : undefined;
+  const url = ctfImageUrl(img, { w: IMG_PRESETS.CARD.maxW });
+  const blur = ctfBlurDataURL(img);
   const alt = (img?.fields?.title as string) || f.title;
 
   // date
@@ -38,7 +41,7 @@ export default function BlogCard({ post }: { post: BlogPostEntry }) {
     : "";
 
   // optional reading time
-  const read = readingTimeFromRichText(f.textContent);
+  // const read = readingTimeFromRichText(f.textContent);
 
   const href = `/blog/${slugifyTitle(f.title)}`;
 
@@ -56,7 +59,7 @@ export default function BlogCard({ post }: { post: BlogPostEntry }) {
             className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             placeholder={blur ? "blur" : undefined}
             blurDataURL={blur}
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             priority={false}
           />
         ) : (
@@ -69,8 +72,8 @@ export default function BlogCard({ post }: { post: BlogPostEntry }) {
       <div className="p-4">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-neutral-500">
           {date && <time>{date}</time>}
-          {date && read && <span aria-hidden>•</span>}
-          {read && <span>{read}</span>}
+          {/* {date && read && <span aria-hidden>•</span>}
+          {read && <span>{read}</span>} */}
         </div>
 
         <h3 className="mt-1 line-clamp-2 text-lg font-semibold tracking-tight">
