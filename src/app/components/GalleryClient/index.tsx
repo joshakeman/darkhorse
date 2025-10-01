@@ -1,76 +1,75 @@
+// src/app/components/GalleryClient/index.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { ProjectEntry } from "../../../../lib/contentful-types";
 import ProjectGrid from "../ProjectGrid";
 
 type Cat = "all" | "kitchen" | "bathrooms" | "builtins" | "closets";
 
 const hasKitchen = (p: ProjectEntry) =>
-  Boolean((p.fields as any).categoryKitchen ?? (p.fields as any).categoryKitchens);
+  Boolean(
+    (p.fields as any)?.categoryKitchen ?? (p.fields as any)?.categoryKitchens
+  );
 
 const hasBathrooms = (p: ProjectEntry) =>
-  Boolean((p.fields as any).categoryBathroom ?? (p.fields as any).categoryBathrooms);
+  Boolean(
+    (p.fields as any)?.categoryBathroom ?? (p.fields as any)?.categoryBathrooms
+  );
 
 const hasBuiltins = (p: ProjectEntry) =>
-  Boolean((p.fields as any).categoryBuiltIn ?? (p.fields as any).categoryBuiltIns);
+  Boolean(
+    (p.fields as any)?.categoryBuiltIn ?? (p.fields as any)?.categoryBuiltIns
+  );
 
 const hasClosets = (p: ProjectEntry) =>
-  Boolean((p.fields as any).categoryCloset ?? (p.fields as any).categoryClosets);
+  Boolean(
+    (p.fields as any)?.categoryCloset ?? (p.fields as any)?.categoryClosets
+  );
 
-export default function GalleryClient({ projects }: { projects: ProjectEntry[] }) {
+export default function GalleryClient({
+  projects,
+}: {
+  projects: ProjectEntry[];
+}) {
   const [cat, setCat] = useState<Cat>("all");
 
-//   const list = useMemo(() => {
-//     if (cat === "all") {
-//       return [...projects].sort(
-//         (a, b) => +new Date(b.sys.createdAt) - +new Date(a.sys.createdAt)
-//       );
-//     }
+  const list = useMemo(() => {
+    const byNewest = (a: ProjectEntry, b: ProjectEntry) =>
+      +new Date(b.sys.createdAt) - +new Date(a.sys.createdAt);
 
-//     const score = (p: ProjectEntry) =>
-//       (cat === "kitchen" && hasKitchen(p)) ||
-//       (cat === "bathrooms" && hasBathrooms(p)) ||
-//       (cat === "builtins" && hasBuiltins(p)) ||
-//       (cat === "closets" && hasClosets(p))
-//         ? 1
-//         : 0;
+    if (cat === "all") return [...projects].sort(byNewest);
 
-//     return [...projects].sort((a, b) => {
-//       const sb = score(b) - score(a);
-//       return sb !== 0
-//         ? sb
-//         : +new Date(b.sys.createdAt) - +new Date(a.sys.createdAt);
-//     });
-//   }, [projects, cat]);
+    const match = (p: ProjectEntry) =>
+      (cat === "kitchen" && hasKitchen(p)) ||
+      (cat === "bathrooms" && hasBathrooms(p)) ||
+      (cat === "builtins" && hasBuiltins(p)) ||
+      (cat === "closets" && hasClosets(p));
 
-const list = useMemo(() => {
-  const byNewest = (a: ProjectEntry, b: ProjectEntry) =>
-    +new Date(b.sys.createdAt) - +new Date(a.sys.createdAt);
-
-  if (cat === "all") return [...projects].sort(byNewest);
-
-  const match = (p: ProjectEntry) =>
-    (cat === "kitchen" && hasKitchen(p)) ||
-    (cat === "bathrooms" && hasBathrooms(p)) ||
-    (cat === "builtins" && hasBuiltins(p)) ||
-    (cat === "closets" && hasClosets(p));
-
-  return projects.filter(match).sort(byNewest);
-}, [projects, cat]);
+    return projects.filter(match).sort(byNewest);
+  }, [projects, cat]);
 
   return (
     <section className="container mx-auto px-4 py-10">
+      {/* sticky segmented control under the fixed header */}
       <div className="sticky top-[96px] z-40 mb-6 flex justify-center backdrop-blur supports-[backdrop-filter]:bg-white/70">
         <Segmented value={cat} onChange={setCat} />
       </div>
+
       <div key={cat} className="animate-[fade_200ms_ease]">
         <ProjectGrid projects={list} />
       </div>
+
       <style jsx global>{`
         @keyframes fade {
-          from { opacity: 0; transform: translateY(2px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(2px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
       `}</style>
     </section>
@@ -92,11 +91,38 @@ function Segmented({
     { key: "closets", label: "Closets" },
   ];
 
+  const listRef = useRef<HTMLDivElement>(null);
+
+  // Simple keyboard navigation across tabs
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const idx = items.findIndex((i) => i.key === value);
+    if (idx < 0) return;
+
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      onChange(items[(idx + 1) % items.length].key);
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      onChange(items[(idx - 1 + items.length) % items.length].key);
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      onChange(items[0].key);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      onChange(items[items.length - 1].key);
+    }
+  };
+
   return (
     <div
+      ref={listRef}
       role="tablist"
       aria-label="Gallery categories"
-      className="relative inline-flex rounded-full border border-neutral-200 bg-white p-1 shadow-sm"
+      onKeyDown={onKeyDown}
+      className="
+        relative inline-flex max-w-full overflow-x-auto no-scrollbar
+        rounded-full border border-neutral-200 bg-white p-1 shadow-sm
+      "
     >
       {items.map((it) => {
         const active = value === it.key;
@@ -107,14 +133,20 @@ function Segmented({
             aria-selected={active}
             onClick={() => onChange(it.key)}
             className={[
-              "relative z-10 rounded-full px-4 py-2 text-sm cursor-pointer transition",
-              active ? "text-white" : "text-neutral-700 hover:text-neutral-900",
+              "relative z-10 cursor-pointer rounded-full px-4 py-2 text-sm transition",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20",
+              active
+                ? "text-white"
+                : "text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100",
             ].join(" ")}
           >
             {active && (
               <span
                 aria-hidden
-                className="absolute inset-0 -z-10 rounded-full bg-neutral-900 shadow"
+                className="
+                  absolute inset-0 -z-10 rounded-full bg-neutral-900
+                  shadow-[0_1px_2px_rgba(0,0,0,0.25)] ring-1 ring-black/10
+                "
               />
             )}
             {it.label}

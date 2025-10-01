@@ -38,8 +38,8 @@ export default function ContactForm() {
 
   return (
     <div className="mx-auto max-w-2xl rounded-2xl bg-white p-6 ring-1 ring-black/5">
-      <h2 className="font-serif text-2xl tracking-tight">Let’s talk about your project</h2>
-      <p className="mt-1 text-sm text-neutral-600">
+      <h2 className="font-serif text-3xl tracking-tight">Let’s talk about your project</h2>
+      <p className="mt-1 text-lg text-neutral-600">
         Tell us a bit about your space and goals. We’ll get back to you shortly.
       </p>
 
@@ -59,38 +59,38 @@ export default function ContactForm() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-sm font-medium">Name</label>
+            <label className="mb-1 block text-lg font-medium">Name</label>
             <input
               name="name"
               required
-              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-neutral-900/10"
+              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-lg outline-none focus:ring-2 focus:ring-neutral-900/10"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Email</label>
+            <label className="mb-1 block text-lg font-medium">Email</label>
             <input
               type="email"
               name="email"
               required
-              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-neutral-900/10"
+              className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-lg outline-none focus:ring-2 focus:ring-neutral-900/10"
             />
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Phone (optional)</label>
+          <label className="mb-1 block text-lg font-medium">Phone (optional)</label>
           <input
             name="phone"
-            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-neutral-900/10"
+            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-lg outline-none focus:ring-2 focus:ring-neutral-900/10"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Project Type</label>
+          <label className="mb-1 block text-lg font-medium">Project Type</label>
           <select
             name="projectType"
-            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-neutral-900/10"
+            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-lg outline-none focus:ring-2 focus:ring-neutral-900/10"
             defaultValue="Kitchen"
           >
             <option>Kitchen</option>
@@ -102,12 +102,12 @@ export default function ContactForm() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Message</label>
+          <label className="mb-1 block text-lg font-medium">Message</label>
           <textarea
             name="message"
             required
             rows={5}
-            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-neutral-900/10"
+            className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-lg outline-none focus:ring-2 focus:ring-neutral-900/10"
             placeholder="Tell us about your space, timeline, and any inspiration."
           />
         </div>
@@ -116,16 +116,16 @@ export default function ContactForm() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="inline-flex items-center justify-center rounded-md bg-neutral-900 px-5 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-md bg-neutral-900 px-5 py-2 text-lg font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
           >
             {status === "loading" ? "Sending…" : "Send message"}
           </button>
 
           {status === "success" && (
-            <span className="text-sm text-green-700">Thanks — we’ll be in touch shortly.</span>
+            <span className="text-lg text-green-700">Thanks — we’ll be in touch shortly.</span>
           )}
           {status === "error" && (
-            <span className="text-sm text-red-700">Couldn’t send. {error ?? "Please try again."}</span>
+            <span className="text-lg text-red-700">Couldn’t send. {error ?? "Please try again."}</span>
           )}
         </div>
       </form>

@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+dist
+.build
+public/**/*.png
+public/**/*.jpg
+public/**/*.jpeg
+public/**/*.webp
+optimized
