@@ -60,7 +60,7 @@ export default function PageHeader({
         />
 
         {/* 1) Top gradient: boosts title contrast */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/35 to-transparent" />
+        <div className="pointer-events-none absolute inset-0" />
 
         {/* 2) Radial vignette: adds depth, eye focus */}
         <div

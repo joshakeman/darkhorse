@@ -28,26 +28,38 @@ export async function generateStaticParams() {
   return titles.map(({ title }) => ({ slug: slugifyTitle(title) }));
 }
 
-// ✅ Use `any` here to avoid the ambient PageProps constraint
-export async function generateMetadata({ params }: any): Promise<Metadata> {
-  const post = await getBlogBySlugFromTitle(params.slug as string);
+type SlugParams = { slug: string };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<SlugParams>;
+}): Promise<Metadata> {
+  const { slug } = await params; // ✅ await params
+  const post = await getBlogBySlugFromTitle(slug);
   return { title: post ? post.fields.title : "Post not found" };
 }
 
 // --- Page --------------------------------------------------------------------
 
-// ✅ Use `any` here too
-export default async function BlogPostPage({ params }: any) {
-  const post = await getBlogBySlugFromTitle(params.slug as string);
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<SlugParams>;
+}) {
+  const { slug } = await params; // ✅ await params
+  const post = await getBlogBySlugFromTitle(slug);
   if (!post) notFound();
 
   const f = post.fields;
 
+  // Feature image (displayed at the top of the body)
   const hero = (f.featureImage ?? null) as unknown as AssetLike | null;
   const heroUrl = ctfImageUrl(hero, { w: IMG_PRESETS.CONTENT.maxW });
   const heroBlur = ctfBlurDataURL(hero);
   const heroAlt = hero?.fields?.title || f.title;
 
+  // Gather gallery images and remove the feature image (avoid dupes)
   const galleryAll: AssetLike[] = Array.isArray(f.galleryImages)
     ? (f.galleryImages as unknown[]).filter(isAssetLike)
     : [];
@@ -55,6 +67,7 @@ export default async function BlogPostPage({ params }: any) {
     ? galleryAll.filter((a) => a?.sys?.id !== hero.sys.id)
     : galleryAll;
 
+  // Track which images the interleaver consumes so we can show leftovers later
   const usedIds = new Set<string>();
 
   const date = f.publishDate
@@ -91,6 +104,7 @@ export default async function BlogPostPage({ params }: any) {
               placeholder={heroBlur ? "blur" : undefined}
               blurDataURL={heroBlur}
               sizes="(max-width: 640px) 100vw, 768px"
+              priority={false}
             />
           </div>
         )}

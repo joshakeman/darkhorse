@@ -29,7 +29,7 @@ export default function ProjectCard({ p }: { p: ProjectEntry }) {
               No image
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+          <div className="absolute inset-0" />
         </div>
 
         <div className="p-4">

@@ -11,6 +11,8 @@ import {
 import { slugifyTitle } from "../../../../lib/slug";
 
 import InterleavedRichText from "../../components/InterleavedRichText";
+import LightboxGrid from "../../components/LightboxGrid";
+import CategoryChipsLightbox from "../../components/CategoryChipsLightbox";
 import { isAssetLike, type AssetLike } from "../../../../lib/image";
 import {
   ctfImageUrl,
@@ -20,25 +22,37 @@ import {
 
 export const revalidate = 60;
 
-// ----- SSG params + metadata -------------------------------------------------
+type SlugParams = { slug: string };
 
+// --- SSG params (unchanged) ---
 export async function generateStaticParams() {
   const titles = await getProjectTitles();
   return titles.map(({ title }) => ({ slug: slugifyTitle(title) }));
 }
 
-// ✅ Use `any` to avoid ambient PageProps with params: Promise<any>
-export async function generateMetadata({ params }: any): Promise<Metadata> {
-  const project = await getProjectBySlugFromTitle(params.slug as string);
-  if (!project) return { title: "Project not found" };
-  return { title: project.fields.title };
+// --- FIXED generateMetadata: await params ---
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<SlugParams>;
+}): Promise<Metadata> {
+  const { slug } = await params; // ⬅️ important
+  const project = await getProjectBySlugFromTitle(slug);
+  return project
+    ? { title: project.fields.title }
+    : { title: "Project not found" };
 }
 
 // ----- Page ------------------------------------------------------------------
 
-// ✅ Use `any` here too
-export default async function ProjectPage({ params }: any) {
-  const project = await getProjectBySlugFromTitle(params.slug as string);
+// --- FIXED page component: await params ---
+export default async function ProjectPage({
+  params,
+}: {
+  params: Promise<SlugParams>;
+}) {
+  const { slug } = await params; // ⬅️ important
+  const project = await getProjectBySlugFromTitle(slug);
   if (!project) notFound();
 
   const f = project.fields;
@@ -62,7 +76,7 @@ export default async function ProjectPage({ params }: any) {
     (f as any).categoryBathrooms ? "Bathroom" : null,
     (f as any).categoryBuiltIns ? "Built-ins" : null,
     (f as any).categoryClosets ? "Closets" : null,
-  ].filter(Boolean) as string[];
+  ].filter(Boolean) as ("Kitchen" | "Bathroom" | "Built-ins" | "Closets")[];
 
   // Track which images are used by the interleaver so we can show leftovers later
   const usedIds = new Set<string>();
@@ -83,11 +97,11 @@ export default async function ProjectPage({ params }: any) {
               sizes="(max-width: 640px) 100vw, (max-width: 1280px) 90vw, 1200px"
               priority
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t" />
             <div className="absolute bottom-4 left-4 right-4 text-white">
               <Link
                 href="/gallery"
-                className="inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-neutral-900 ring-1 ring-black/5 hover:bg-white"
+                className="cursor-pointer inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-neutral-900 ring-1 ring-black/5 hover:bg-white"
               >
                 ← Back to Gallery
               </Link>
@@ -95,16 +109,11 @@ export default async function ProjectPage({ params }: any) {
                 {f.title}
               </h1>
               {chips.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {chips.map((c) => (
-                    <span
-                      key={c}
-                      className="rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-neutral-900"
-                    >
-                      {c}
-                    </span>
-                  ))}
-                </div>
+                <CategoryChipsLightbox
+                  chips={chips}
+                  images={gallery}
+                  title={f.title}
+                />
               )}
             </div>
           </div>
@@ -135,32 +144,10 @@ export default async function ProjectPage({ params }: any) {
           <h2 className="mb-4 text-xl font-semibold tracking-tight">
             Project Gallery
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {gallery
-              .filter((a) => !usedIds.has(a.sys.id))
-              .map((asset) => {
-                const url = ctfImageUrl(asset, { w: IMG_PRESETS.CARD.maxW });
-                if (!url) return null;
-                const alt = asset.fields.title || f.title;
-                return (
-                  <div
-                    key={asset.sys.id}
-                    className="relative aspect-[4/3] overflow-hidden rounded-xl ring-1 ring-black/5"
-                  >
-                    <Image
-                      src={url}
-                      alt={alt}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                      placeholder="blur"
-                      blurDataURL={ctfBlurDataURL(asset)}
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                );
-              })}
-          </div>
+          <LightboxGrid
+            images={gallery.filter((a) => !usedIds.has(a.sys.id))}
+            title={f.title}
+          />
         </section>
       )}
     </article>

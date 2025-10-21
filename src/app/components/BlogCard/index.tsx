@@ -66,7 +66,7 @@ export default function BlogCard({ post }: { post: BlogPostEntry }) {
           <div className="h-full w-full bg-neutral-100" />
         )}
         {/* soft gradient for legibility */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-transparent" />
+        <div className="pointer-events-none absolute inset-0" />
       </div>
 
       <div className="p-4">

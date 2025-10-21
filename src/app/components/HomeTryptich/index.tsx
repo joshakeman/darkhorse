@@ -30,7 +30,9 @@ export function HomeTriptych({
       blurb: "Start your project with a consultation.",
     },
   ],
-}: { items?: Card[] }) {
+}: {
+  items?: Card[];
+}) {
   return (
     <section className="container mx-auto px-4 py-16">
       <div className="grid gap-6 md:grid-cols-3">
@@ -52,7 +54,7 @@ export function HomeTriptych({
                 priority={false}
               />
               {/* Overlay + subtle vignette */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent" />
+              <div className="absolute inset-0" />
               <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_80px_rgba(0,0,0,0.35)]" />
             </div>
 
@@ -73,7 +75,12 @@ export function HomeTriptych({
               )}
               <span className="font-serif mt-3 inline-flex items-center gap-2 rounded-full border border-white/80 px-3 py-1 text-xs uppercase tracking-wider transition group-hover:bg-white group-hover:text-black">
                 Learn more
-                <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <svg
+                  className="h-3 w-3"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
                   <path d="M7.5 5.5 12 10l-4.5 4.5" />
                 </svg>
               </span>
