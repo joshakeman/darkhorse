@@ -4,7 +4,7 @@ export default function Hero() {
   return (
     <section
       className="relative h-screen flex items-center justify-center bg-center bg-cover"
-      style={{ backgroundImage: "url('/neids-1.webp')" }}
+      style={{ backgroundImage: "url('/8Th-Street-03.jpg')" }}
     >
       <div className="pointer-events-none absolute inset-0 z-0 bg-black/50" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-24 z-0 from-black/10 to-transparent" />

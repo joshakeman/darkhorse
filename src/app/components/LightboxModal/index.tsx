@@ -125,9 +125,9 @@ export default function LightboxModal({
           )}
         </div>
 
-        {(caption || alt) && (
+        {caption && (
           <div className="mt-3 text-center text-sm text-white/80 mb-8">
-            {caption || alt}
+            {caption}
           </div>
         )}
 

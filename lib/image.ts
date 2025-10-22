@@ -13,6 +13,12 @@ export type AssetLike = {
       };
     };
   };
+  metadata?: {
+    tags?: Array<{ sys?: { id?: string; linkType?: string; type?: string } }>;
+    concepts?: Array<{
+      sys?: { id?: string; linkType?: string; type?: string };
+    }>;
+  };
   sys: { id: string };
 };
 
@@ -59,4 +65,25 @@ export function ctfBlurDataURL(x: unknown): string | undefined {
   const base = x.fields?.file?.url;
   if (!base) return undefined;
   return `https:${base}?fm=webp&w=24&q=20`;
+}
+
+export function getAssetTagIds(a?: AssetLike | null): string[] {
+  return (
+    a?.metadata?.tags
+      ?.map((t) => t?.sys?.id)
+      .filter((id): id is string => Boolean(id)) ?? []
+  );
+}
+
+// Quick check
+export function assetHasTag(
+  a: AssetLike | null | undefined,
+  tagId: string
+): boolean {
+  return getAssetTagIds(a).includes(tagId);
+}
+
+// Turn tag id like "mudroom-storage" → "Mudroom Storage"
+export function humanizeTagId(id: string): string {
+  return id.replace(/[-_]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 }

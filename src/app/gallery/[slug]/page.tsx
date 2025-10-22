@@ -19,6 +19,7 @@ import {
   ctfBlurDataURL,
   IMG_PRESETS,
 } from "../../../../lib/image";
+import TagChipsLightbox from "@/app/components/TagChipsLightbox";
 
 export const revalidate = 60;
 
@@ -108,13 +109,8 @@ export default async function ProjectPage({
               <h1 className="font-serif text-4xl md:text-6xl tracking-tight">
                 {f.title}
               </h1>
-              {chips.length > 0 && (
-                <CategoryChipsLightbox
-                  chips={chips}
-                  images={gallery}
-                  title={f.title}
-                />
-              )}
+              {/** inside the hero overlay block, under the title */}
+              <TagChipsLightbox images={gallery} title={f.title} />
             </div>
           </div>
         ) : (
