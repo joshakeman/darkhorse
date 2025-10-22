@@ -33,6 +33,25 @@ export async function getProjects(limit = 12): Promise<ProjectEntry[]> {
   return res.items as ProjectEntry[];
 }
 
+// Get featured projects (only those marked isFeaturedProject = true)
+export async function getFeaturedProjects(limit = { limit: 12 }) {
+  const query = {
+    content_type: "projects",
+    "fields.isFeaturedProject": true,
+    order: ["-sys.createdAt"],
+    ...limit,
+  };
+
+  try {
+    const res = await contentful.getEntries(query);
+    console.log("Ressss: ", res);
+    return res.items;
+  } catch (err) {
+    console.error("Error fetching featured projects:", err);
+    return [];
+  }
+}
+
 // Return all titles (and ids) to generate static params
 export async function getProjectTitles(): Promise<
   Array<{ id: string; title: string }>
