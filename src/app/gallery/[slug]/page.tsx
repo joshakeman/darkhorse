@@ -19,7 +19,7 @@ import {
   ctfBlurDataURL,
   IMG_PRESETS,
 } from "../../../../lib/image";
-import TagChipsLightbox from "@/app/components/TagChipsLightbox";
+import PageHeader from "@/app/components/PageHeader";
 
 export const revalidate = 60;
 
@@ -86,36 +86,13 @@ export default async function ProjectPage({
     <article className="container mx-auto px-4 pb-20">
       {/* Pull hero up under fixed header (adjust the negative margin to match your header height) */}
       <div className="-mt-[96px] mb-8">
-        {heroUrl ? (
-          <div className="relative h-[48vh] min-h-[320px] w-full overflow-hidden rounded-b-2xl">
-            <Image
-              src={heroUrl}
-              alt={f.title}
-              fill
-              className="object-cover"
-              placeholder={heroBlur ? "blur" : undefined}
-              blurDataURL={heroBlur}
-              sizes="(max-width: 640px) 100vw, (max-width: 1280px) 90vw, 1200px"
-              priority
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t" />
-            <div className="absolute bottom-4 left-4 right-4 text-white">
-              <Link
-                href="/gallery"
-                className="cursor-pointer inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-neutral-900 ring-1 ring-black/5 hover:bg-white"
-              >
-                ← Back to Gallery
-              </Link>
-              <h1 className="font-serif text-4xl md:text-6xl tracking-tight">
-                {f.title}
-              </h1>
-              {/** inside the hero overlay block, under the title */}
-              <TagChipsLightbox images={gallery} title={f.title} />
-            </div>
-          </div>
-        ) : (
-          <div className="pt-[96px]" />
-        )}
+        <PageHeader
+          title={f.title}
+          imageSrc={heroUrl ?? "/black-walnut-american-wood.webp"}
+          showBackButton
+          backHref="/gallery"
+          tagLightbox={{ images: gallery, projectTitle: f.title }}
+        />
       </div>
 
       {/* Body with interleaved images (skip the first gallery image since we have a hero) */}

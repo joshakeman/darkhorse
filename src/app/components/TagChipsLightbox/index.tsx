@@ -1,80 +1,80 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
-import type { AssetLike } from "../../../../lib/image";
-import { ctfImageUrl, ctfBlurDataURL } from "../../../../lib/image";
+import {
+  type AssetLike,
+  ctfImageUrl,
+  ctfBlurDataURL,
+} from "../../../../lib/image";
+
+// ——— Utils ———
+function tagId(a: AssetLike) {
+  return a?.metadata?.tags?.[0]?.sys?.id ?? null; // first tag if present
+}
+function tagLabel(id: string) {
+  // simple labelizer; adjust if you have nicer names in Contentful concepts
+  return id.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 type Props = {
-  images: AssetLike[]; // all gallery assets for the project
-  title?: string; // fallback alt/caption
-  className?: string; // optional wrapper classes for the chip row
-  // Optional: pass a custom list/order of tags. If omitted, tags are derived from images.
-  tagsOverride?: string[];
+  images: AssetLike[];
+  title?: string; // project title (fallback for alt/caption)
+  className?: string;
 };
-
-/** Read Contentful asset tags safely */
-function getAssetTags(a: AssetLike): string[] {
-  const raw = (a as any)?.metadata?.tags ?? [];
-  return Array.isArray(raw)
-    ? raw
-        .map((t: any) => t?.sys?.id || t?.sys?.urn || t?.sys?.name)
-        .filter(Boolean)
-    : [];
-}
-
-/** Build a unique, sorted tag list from the images */
-function uniqueTagsFrom(images: AssetLike[]): string[] {
-  const set = new Set<string>();
-  for (const a of images) getAssetTags(a).forEach((t) => set.add(t));
-  return [...set].sort((a, b) => a.localeCompare(b));
-}
 
 export default function TagChipsLightbox({
   images,
   title = "",
   className,
-  tagsOverride,
 }: Props) {
-  const tags =
-    tagsOverride && tagsOverride.length > 0
-      ? tagsOverride
-      : uniqueTagsFrom(images);
+  // Build tag map: { tagId -> AssetLike[] }
+  const { tags, map } = useMemo(() => {
+    const m = new Map<string, AssetLike[]>();
+    for (const a of images) {
+      const id = tagId(a);
+      if (!id) continue;
+      if (!m.has(id)) m.set(id, []);
+      m.get(id)!.push(a);
+    }
+    const arr = Array.from(m.keys()).sort();
+    return { tags: arr, map: m };
+  }, [images]);
 
-  // Modal state
+  // Lightbox state
   const [open, setOpen] = useState(false);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [idx, setIdx] = useState(0);
 
-  // Filter images by active tag
-  const filtered = useMemo(() => {
-    if (!activeTag) return [];
-    return images.filter((a) => getAssetTags(a).includes(activeTag));
-  }, [images, activeTag]);
-
-  const count = filtered.length;
-
-  // Open for a tag
-  const openForTag = useCallback((tag: string) => {
-    setActiveTag(tag);
+  const openTag = useCallback((id: string) => {
+    setActiveTag(id);
     setIdx(0);
     setOpen(true);
   }, []);
 
   const close = useCallback(() => setOpen(false), []);
+
+  const list = useMemo<AssetLike[]>(() => {
+    if (!activeTag) return [];
+    return map.get(activeTag) ?? [];
+  }, [activeTag, map]);
+
+  const count = list.length;
+
   const prev = useCallback(
     () => setIdx((i) => (i - 1 + count) % count),
     [count]
   );
   const next = useCallback(() => setIdx((i) => (i + 1) % count), [count]);
 
-  // Lock scroll when open
+  // Body scroll lock when open
   useEffect(() => {
     if (!open) return;
-    const prevOverflow = document.body.style.overflow;
+    const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = prev;
     };
   }, [open]);
 
@@ -90,7 +90,7 @@ export default function TagChipsLightbox({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, close, prev, next]);
 
-  // Touch swipe
+  // Simple swipe
   const startX = useRef<number | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
     startX.current = e.touches[0].clientX;
@@ -102,159 +102,149 @@ export default function TagChipsLightbox({
     if (Math.abs(delta) > 40) delta > 0 ? prev() : next();
   };
 
-  // Current large image URLs/labels
-  const { largeUrl, largeBlur, largeAlt, caption } = useMemo(() => {
-    const a = filtered[idx];
-    if (!a) return { largeUrl: "", largeBlur: "", largeAlt: "", caption: "" };
-    return {
-      largeUrl: ctfImageUrl(a, { w: 2000, q: 75, fm: "webp" }) || "",
-      largeBlur: ctfBlurDataURL(a) || "",
-      largeAlt: a?.fields?.title || title || "Image",
-      caption: a?.fields?.description || "",
-    };
-  }, [filtered, idx, title]);
+  // Current large image data
+  const cur = list[idx];
+  const largeUrl = cur
+    ? ctfImageUrl(cur, { w: 2000, q: 75, fm: "webp" })
+    : null;
+  const largeBlur = cur ? ctfBlurDataURL(cur) : undefined;
+  const largeAlt = cur?.fields?.title || title || "Image";
+  const caption = cur?.fields?.description || null;
 
   return (
     <>
-      {/* Chip row */}
-      {tags.length > 0 && (
-        <div
-          className={["mt-3 flex flex-wrap gap-2", className || ""].join(" ")}
-        >
-          {tags.map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => openForTag(t)}
-              className="cursor-pointer rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-neutral-900 ring-1 ring-black/5
-                         hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
-              aria-label={`View ${t} images`}
-              title={`View ${t} images`}
-            >
-              {t.replace(/[-_]/g, " ")}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Lightbox modal (no grid) */}
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 p-4"
-          onClick={close}
-          onTouchStart={onTouchStart}
-          onTouchEnd={onTouchEnd}
-        >
-          <div
-            className="relative mx-auto w-full max-w-6xl"
-            onClick={(e) => e.stopPropagation()}
+      {/* Chip row (inline) */}
+      <div
+        className={["flex flex-wrap gap-2", className ?? ""]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {tags.map((id) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => openTag(id)}
+            className="cursor-pointer rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90 supports-[backdrop-filter]:backdrop-blur-sm hover:bg-white/20"
           >
-            {/* Title above image */}
-            {/* <div className="mb-3 text-center text-sm text-white/80">
-              {activeTag
-                ? `${activeTag.replace(/[-_]/g, " ")} from this project`
-                : ""}
-            </div> */}
+            {tagLabel(id)}
+          </button>
+        ))}
+      </div>
 
-            {/* Image */}
-            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl ring-1 ring-white/10 bg-black/20">
-              {largeUrl && (
-                <Image
-                  src={largeUrl}
-                  alt={largeAlt}
-                  fill
-                  className="object-contain"
-                  placeholder={largeBlur ? "blur" : undefined}
-                  blurDataURL={largeBlur || undefined}
-                  sizes="(max-width: 768px) 100vw, 1200px"
-                  priority
-                />
+      {/* Lightbox in a PORTAL so it escapes PageHeader clipping */}
+      {open &&
+        createPortal(
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 p-4"
+            onClick={close}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
+            <div
+              className="relative mx-auto w-full max-w-6xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Title / context */}
+              {activeTag && (
+                <div className="mb-3 text-center text-sm text-white/80">
+                  <span className="font-semibold">{tagLabel(activeTag)}</span>
+                  {title ? <> • {title}</> : null}
+                </div>
+              )}
+
+              {/* Image */}
+              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl ring-1 ring-white/10 bg-black/20">
+                {largeUrl && (
+                  <Image
+                    src={largeUrl}
+                    alt={largeAlt}
+                    fill
+                    className="object-contain"
+                    placeholder={largeBlur ? "blur" : undefined}
+                    blurDataURL={largeBlur || undefined}
+                    sizes="(max-width: 768px) 100vw, 1200px"
+                    priority
+                  />
+                )}
+              </div>
+
+              {/* Caption */}
+              {(caption || largeAlt) && (
+                <div className="mt-3 text-center text-sm text-white/85">
+                  {caption || largeAlt}
+                </div>
+              )}
+
+              {/* Close */}
+              <button
+                type="button"
+                onClick={close}
+                className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-neutral-900/70 text-white shadow-lg ring-1 ring-white/20 backdrop-blur hover:bg-neutral-900/80"
+                aria-label="Close"
+              >
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 8.586 4.707 3.293a1 1 0 0 0-1.414 1.414L8.586 10l-5.293 5.293a1 1 0 0 0 1.414 1.414L10 11.414l5.293 5.293a1 1 0 0 0 1.414-1.414L11.414 10l5.293-5.293a1 1 0 0 0-1.414-1.414L10 8.586Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+
+              {/* Prev/Next */}
+              {count > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={prev}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-neutral-900/70 text-white shadow ring-1 ring-white/20 backdrop-blur hover:bg-neutral-900/80"
+                    aria-label="Previous image"
+                  >
+                    <svg
+                      viewBox="0 0 20 20"
+                      className="h-5 w-5"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M12.707 15.707a1 1 0 0 1-1.414 0L6.586 11l4.707-4.707a1 1 0 1 1 1.414 1.414L9.414 11l3.293 3.293a1 1 0 0 1 0 1.414Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={next}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-neutral-900/70 text-white shadow ring-1 ring-white/20 backdrop-blur hover:bg-neutral-900/80"
+                    aria-label="Next image"
+                  >
+                    <svg
+                      viewBox="0 0 20 20"
+                      className="h-5 w-5"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M7.293 4.293a1 1 0 0 1 1.414 0L13.414 9 8.707 13.707a1 1 0 1 1-1.414-1.414L10.586 9 7.293 5.707a1 1 0 0 1 0-1.414Z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-xs text-white/80">
+                    {idx + 1} / {count}
+                  </div>
+                </>
               )}
             </div>
-
-            {/* Caption */}
-            {caption && (
-              <div className="mt-3 text-center text-sm text-white/80">
-                {caption}
-              </div>
-            )}
-
-            {/* Close */}
-            <button
-              type="button"
-              onClick={close}
-              className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-neutral-800 shadow-lg backdrop-blur-sm hover:bg-white transition"
-              aria-label="Close"
-            >
-              <span className="sr-only">Close</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                className="h-5 w-5"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 8.586 4.707 3.293a1 1 0 1 0-1.414 1.414L8.586 10l-5.293 5.293a1 1 0 1 0 1.414 1.414L10 11.414l5.293 5.293a1 1 0 0 0 1.414-1.414L11.414 10l5.293-5.293A1 1 0 0 0 15.293 3.293L10 8.586Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-
-            {/* Prev / Next */}
-            {count > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={prev}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur-sm hover:bg-white transition"
-                  aria-label="Previous image"
-                >
-                  <span className="sr-only">Previous</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    className="h-5 w-5"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12.707 15.707a1 1 0 0 1-1.414 0L6.586 11l4.707-4.707a1 1 0 1 1 1.414 1.414L9.414 11l3.293 3.293a1 1 0 0 1 0 1.414Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={next}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-neutral-800 shadow-md backdrop-blur-sm hover:bg-white transition"
-                  aria-label="Next image"
-                >
-                  <span className="sr-only">Next</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    className="h-5 w-5"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 4.293a1 1 0 0 1 1.414 0L13.414 9l-4.707 4.707a1 1 0 1 1-1.414-1.414L10.586 9 7.293 5.707a1 1 0 0 1 0-1.414Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-
-                <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 text-xs text-white/80">
-                  {idx + 1} / {count}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </>
   );
 }

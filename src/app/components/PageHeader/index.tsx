@@ -1,44 +1,42 @@
 // src/app/components/PageHeader/index.tsx
 import Image from "next/image";
+import Link from "next/link";
+import TagChipsLightbox from "../TagChipsLightbox";
+import type { AssetLike } from "../../../../lib/image";
 
 type Props = {
   title: string;
   subtitle?: string;
   /** Optional override; defaults to walnut texture in /public */
   imageSrc?: string;
-  /** Optional custom blur placeholder; falls back to a tiny SVG shimmer */
-  blurDataURL?: string;
+  /** Show a back link (e.g., on project pages) */
+  showBackButton?: boolean;
+  /** Where the back link should go (defaults to /gallery when shown) */
+  backHref?: string;
   /** Pass through to next/image for LCP sections */
   priority?: boolean;
-};
 
-// tiny SVG shimmer as a lightweight default blurDataURL
-function shimmer(width = 1200, height = 600, c1 = "#222", c2 = "#111") {
-  const svg = `
-    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" version="1.1">
-      <defs>
-        <linearGradient id="g">
-          <stop stop-color="${c1}" offset="20%" />
-          <stop stop-color="${c2}" offset="50%" />
-          <stop stop-color="${c1}" offset="80%" />
-        </linearGradient>
-      </defs>
-      <rect width="${width}" height="${height}" fill="${c1}" />
-      <rect id="r" width="${width}" height="${height}" fill="url(#g)" />
-      <animate xlink:href="#r" attributeName="x" from="-${width}" to="${width}" dur="2s" repeatCount="indefinite"  />
-    </svg>`;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
-}
+  /**
+   * When provided, renders the tag-based chips row that opens a lightbox
+   * filtered to each tag (same pattern as gallery pages).
+   */
+  tagLightbox?: {
+    images: AssetLike[];
+    /** Falls back to `title` if omitted */
+    projectTitle?: string;
+  };
+};
 
 export default function PageHeader({
   title,
   subtitle,
   imageSrc,
-  blurDataURL,
+  showBackButton = false,
+  backHref = "/gallery",
   priority = true,
+  tagLightbox,
 }: Props) {
   const src = imageSrc ?? "/black-walnut-american-wood.webp";
-  const blur = blurDataURL ?? shimmer(1200, 600, "#1c1c1c", "#111111");
 
   return (
     <header className="-mt-[96px] mb-10">
@@ -46,53 +44,60 @@ export default function PageHeader({
         className="relative w-full overflow-hidden rounded-b-3xl
                    h-[26vh] min-h-[220px] sm:h-[32vh] sm:min-h-[260px] md:h-[36vh]"
       >
-        {/* Background */}
+        {/* Background image */}
         <Image
           src={src}
-          alt="Dark walnut woodgrain"
+          alt="Header background"
           fill
-          className="object-cover"
-          placeholder="blur"
-          blurDataURL={blur}
-          priority={priority}
+          className="object-cover z-0"
           sizes="100vw"
+          priority={priority}
           fetchPriority={priority ? "high" : "auto"}
         />
 
-        {/* 1) Top gradient: boosts title contrast */}
-        <div className="pointer-events-none absolute inset-0" />
-
-        {/* 2) Radial vignette: adds depth, eye focus */}
+        {/* Readability overlays (above image, below text) */}
+        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/65 via-black/35 to-transparent" />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0"
+          className="pointer-events-none absolute inset-0 z-10"
           style={{
             background:
               "radial-gradient(100% 60% at 50% 60%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.18) 100%)",
           }}
         />
 
-        {/* 3) Subtle top sheen: luxury feel without glare */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-16"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(255,255,255,0.06), rgba(255,255,255,0))",
-            mixBlendMode: "soft-light",
-          }}
-        />
+        {/* Text + translucent card */}
+        <div className="absolute bottom-6 left-6 md:left-10 max-w-2xl w-[90%] sm:w-[70%] z-30">
+          <div className="rounded-xl bg-neutral-900/70 backdrop-blur-md ring-1 ring-white/15 p-5 sm:p-6 text-white shadow-lg relative z-30">
+            {showBackButton && (
+              <Link
+                href={backHref}
+                className="inline-flex items-center gap-2 text-sm text-white/90 hover:text-white mb-3"
+              >
+                ← Back to Gallery
+              </Link>
+            )}
 
-        {/* Text */}
-        <div className="absolute bottom-6 left-6 right-6 md:left-10 md:right-10 max-w-4xl text-white">
-          <h1 className="font-serif text-4xl md:text-6xl tracking-tight">
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="mt-2 text-white/90 text-base md:text-lg">
-              {subtitle}
-            </p>
-          )}
+            <h1 className="font-serif text-4xl md:text-6xl tracking-tight">
+              {title}
+            </h1>
+
+            {subtitle && (
+              <p className="mt-2 text-white/90 text-base md:text-lg">
+                {subtitle}
+              </p>
+            )}
+
+            {/* Tag-based chips that open the filtered lightbox */}
+            {tagLightbox?.images?.length ? (
+              <div className="mt-4">
+                <TagChipsLightbox
+                  images={tagLightbox.images}
+                  title={tagLightbox.projectTitle ?? title}
+                />
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </header>
