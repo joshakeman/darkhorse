@@ -40,7 +40,7 @@ export function HomeTriptych({
           <Link
             key={card.href}
             href={card.href}
-            className="group relative isolate overflow-hidden rounded-xl ring-1 ring-black/5 transition-transform duration-300 will-change-transform hover:-translate-y-0.5"
+            className="group relative isolate overflow-hidden rounded-xl ring-1 ring-black/5 transition-transform duration-300 will-change-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20"
             aria-label={card.title}
           >
             {/* Image */}
@@ -53,8 +53,13 @@ export function HomeTriptych({
                 sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                 priority={false}
               />
-              {/* Overlay + subtle vignette */}
-              <div className="absolute inset-0" />
+
+              {/* Overlays for readability */}
+              {/* Uniform darken */}
+              <div className="pointer-events-none absolute inset-0 bg-black/20" />
+              {/* Bottom gradient for text contrast */}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
+              {/* Subtle vignette */}
               <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_80px_rgba(0,0,0,0.35)]" />
             </div>
 

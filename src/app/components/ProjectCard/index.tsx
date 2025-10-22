@@ -13,7 +13,7 @@ export default function ProjectCard({ p }: { p: ProjectEntry }) {
     <article className="group overflow-hidden rounded-xl ring-1 ring-black/5">
       <Link
         href={`/gallery/${slugifyTitle(p.fields.title)}`}
-        className="hover:underline"
+        // className="hover:underline"
       >
         <div className="relative h-60 w-full">
           {url ? (
@@ -33,7 +33,7 @@ export default function ProjectCard({ p }: { p: ProjectEntry }) {
         </div>
 
         <div className="p-4">
-          <h3 className="text-2xl font-semibold font-serif tracking-tight">
+          <h3 className="text-2xl font-semibold font-serif tracking-tight hover:underline">
             {p.fields.title}
           </h3>
 
